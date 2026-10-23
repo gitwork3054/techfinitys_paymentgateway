@@ -20,7 +20,10 @@
 </div>
 {% if user.is_authenticated %}
 <header class="nav shell-nav">
-  <a class="brand brand-text" href="{% url 'dashboard' %}" aria-label="Techfinitys home">Techfinitys</a>
+  <a class="brand brand-combo" href="{% url 'dashboard' %}" aria-label="Techfinitys home">
+    <img src="{% static 'portal/tf-logo.png' %}" alt="Techfinitys logo">
+    <span>Techfinitys</span>
+  </a>
   <nav id="mainNav">
     {% url 'dashboard' as u1 %}{% url 'records' as u2 %}{% url 'profile' as u3 %}
     <a href="{{u1}}" class="{% if request.path == u1 %}on{% endif %}">Overview</a>
