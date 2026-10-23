@@ -2,35 +2,48 @@ import os
 from datetime import date
 from decimal import Decimal
 from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from portal.models import Client
 
 class Command(BaseCommand):
-    help = "Create or update the production client user and Client profile from environment variables."
+    help = "Create or update the production client login and Client profile from environment variables."
 
     def handle(self, *args, **options):
-        username = os.environ.get("CLIENT_USERNAME", "").strip()
+        username = os.environ.get("CLIENT_USERNAME", "client").strip() or "client"
         password = os.environ.get("CLIENT_PASSWORD", "")
-        if not username or not password:
-            self.stdout.write("CLIENT_USERNAME/CLIENT_PASSWORD not set; skipping client bootstrap.")
-            return
+
+        if not password:
+            raise CommandError(
+                "CLIENT_PASSWORD is missing. Add it in Render > Environment and deploy again."
+            )
 
         User = get_user_model()
-        user, _ = User.objects.get_or_create(username=username)
+        user, created_user = User.objects.get_or_create(username=username)
+
         user.set_password(password)
         user.is_active = True
         user.is_staff = False
         user.is_superuser = False
+
         email = os.environ.get("CLIENT_EMAIL", "").strip()
         if email:
             user.email = email
         user.save()
 
+        user.refresh_from_db()
+        if not user.check_password(password):
+            raise CommandError("Client password verification failed after saving.")
+
         due_raw = os.environ.get("CLIENT_DUE_DATE", "2026-12-31")
         try:
             due_date = date.fromisoformat(due_raw)
         except ValueError:
-            due_date = date(2026, 12, 31)
+            raise CommandError("CLIENT_DUE_DATE must use YYYY-MM-DD format.")
+
+        try:
+            yearly_amount = Decimal(os.environ.get("CLIENT_YEARLY_AMOUNT", "400000"))
+        except Exception:
+            raise CommandError("CLIENT_YEARLY_AMOUNT must be a valid number.")
 
         defaults = {
             "company": os.environ.get("CLIENT_COMPANY", "Client Company"),
@@ -40,13 +53,18 @@ class Command(BaseCommand):
             "address": os.environ.get("CLIENT_ADDRESS", ""),
             "project": os.environ.get("CLIENT_PROJECT", "Software Project"),
             "plan": os.environ.get("CLIENT_PLAN", "Enterprise Annual"),
-            "yearly_amount": Decimal(os.environ.get("CLIENT_YEARLY_AMOUNT", "400000")),
+            "yearly_amount": yearly_amount,
             "due_date": due_date,
         }
-        client, created = Client.objects.get_or_create(user=user, defaults=defaults)
-        if not created:
-            for k, v in defaults.items():
-                setattr(client, k, v)
+
+        client, created_client = Client.objects.get_or_create(user=user, defaults=defaults)
+        if not created_client:
+            for key, value in defaults.items():
+                setattr(client, key, value)
             client.save()
 
-        self.stdout.write(self.style.SUCCESS(f"Client {'created' if created else 'updated'}: {username}"))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"CLIENT_LOGIN_READY username={username} user_created={created_user} profile_created={created_client}"
+            )
+        )
