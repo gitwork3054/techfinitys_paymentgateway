@@ -4,7 +4,7 @@ from . import views as v
 
 urlpatterns = [
     path("", v.dashboard, name="dashboard"),
-    path("login/", av.LoginView.as_view(template_name="portal/login.html"), name="login"),
+    path("login/", v.RememberLoginView.as_view(), name="login"),
     path("logout/", av.LogoutView.as_view(), name="logout"),
     path("profile/", v.profile, name="profile"),
     path("records/", v.records, name="records"),
