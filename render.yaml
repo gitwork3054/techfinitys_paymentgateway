@@ -33,7 +33,7 @@ services:
       - key: CLIENT_ADDRESS
         value: Opposite Old Laxmipura Police Station, Laxmipura Road, Vadodara, Gujarat
       - key: CLIENT_PROJECT
-        value: Festive Growth & Billing Suite
+        value: Billing Suite
       - key: CLIENT_PLAN
         value: Premium Brand Growth Plan
       - key: CLIENT_YEARLY_AMOUNT
