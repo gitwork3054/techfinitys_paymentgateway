@@ -1,2 +1,44 @@
 {% extends "portal/base.html" %}{% block bodyclass %}auth{% endblock %}
-{% block content %}<section class="login-wrap"><div class="login-copy reveal"><p class="eyebrow">Techfinitys client portal</p><h1>One refined space for your software, licence and billing.</h1><p class="mut">Secure access to client details, annual payments, verified receipts and account records.</p></div><section class="login glass reveal"><p class="eyebrow">Secure access</p><h2>Welcome back</h2><p class="mut">Sign in to continue to your workspace.</p><form method="post">{% csrf_token %}{% if form.errors %}<p class="err">Username or password is incorrect.</p>{% endif %}<label>Username<input name="username" autocomplete="username" autofocus required></label><label>Password<input name="password" type="password" autocomplete="current-password" required></label><button class="btn login-btn">Sign in <span>→</span></button></form></section></section>{% endblock %}
+{% block content %}
+<section class="login-wrap">
+  <div class="login-copy reveal">
+    <p class="eyebrow">Techfinitys client portal</p>
+    <h1>One refined space for your software, licence and billing.</h1>
+    <p class="mut">Secure access to client details, annual payments, verified receipts and account records.</p>
+  </div>
+  <section class="login glass reveal">
+    <p class="eyebrow">Secure access</p>
+    <h2>Welcome back</h2>
+    <p class="mut">Sign in to continue to your workspace.</p>
+    <form method="post">
+      {% csrf_token %}
+      {% if form.errors %}<p class="err">Username or password is incorrect.</p>{% endif %}
+      <label>Username<input name="username" autocomplete="username" autofocus required></label>
+      <label>Password
+        <span class="password-field">
+          <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+          <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password" aria-pressed="false">
+            <span class="eye-open">Show</span><span class="eye-closed">Hide</span>
+          </button>
+        </span>
+      </label>
+      <button class="btn login-btn">Sign in <span>→</span></button>
+    </form>
+  </section>
+</section>
+{% endblock %}
+{% block js %}
+<script>
+(()=>{
+  const input=document.getElementById('loginPassword');
+  const button=document.getElementById('passwordToggle');
+  if(!input||!button)return;
+  button.addEventListener('click',()=>{
+    const showing=input.type==='text';
+    input.type=showing?'password':'text';
+    button.setAttribute('aria-pressed',String(!showing));
+    button.setAttribute('aria-label',showing?'Show password':'Hide password');
+  });
+})();
+</script>
+{% endblock %}
