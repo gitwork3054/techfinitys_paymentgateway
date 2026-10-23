@@ -45,7 +45,7 @@ class Command(BaseCommand):
             "phone": os.environ.get("CLIENT_PHONE", "8401947462"),
             "gstin": os.environ.get("CLIENT_GSTIN", ""),
             "address": os.environ.get("CLIENT_ADDRESS", "Opposite Old Laxmipura Police Station, Laxmipura Road, Vadodara, Gujarat"),
-            "project": os.environ.get("CLIENT_PROJECT", "Billing Suite"),
+            "project": "Billing Suite",
             "plan": os.environ.get("CLIENT_PLAN", "Premium Brand Growth Plan"),
             "yearly_amount": yearly_amount,
             "due_date": due_date,
