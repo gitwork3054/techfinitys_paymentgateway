@@ -1,0 +1,103 @@
+{% extends "portal/base.html" %}{% block content %}
+<section class="hero">
+  <div class="hero-copy reveal">
+    <p class="eyebrow">Client workspace</p>
+    <p class="mut greeting">Hello, {{ c.contact }}</p>
+    <h1>{{ c.project }}</h1>
+    <p class="mut hero-meta">{{ c.company }} <span>•</span> {{ c.plan }} <span>•</span> Partner since {{ c.since|date:"M Y" }}</p>
+  </div>
+  <div class="due glass reveal" data-tilt>
+    <div class="card-kicker"><span>Annual licence</span><span>{{ p.year }}</span></div>
+    <div class="amt">₹<b data-count="{{ p.amount|floatformat:0 }}">{{ p.amount|floatformat:0 }}</b></div>
+    {% if p.status == "paid" %}
+      <div class="badge ok">Payment completed · {{ p.paid_at|date:"d M Y" }}</div>
+      <a class="btn" href="{% url 'slip' p.pk %}">View payment slip</a>
+    {% else %}
+      <div class="badge">Due {{ c.due_date|date:"d M Y" }}</div>
+      <button class="btn pulse" id="payNow" data-id="{{ p.pk }}">Pay now</button>
+    {% endif %}
+    <small class="mut invoice-label">Invoice {{ p.invoice_no }}</small>
+  </div>
+</section>
+
+<section class="metrics reveal">
+  <article class="metric"><span>Account status</span><strong>Active</strong></article>
+  <article class="metric"><span>Billing cycle</span><strong>Annual</strong></article>
+  <article class="metric"><span>Current invoice</span><strong>{{ p.invoice_no }}</strong></article>
+</section>
+
+<section class="grid dashboard-grid">
+  <article class="glass reveal"><div class="section-head"><div><p class="eyebrow">Account</p><h3>Client details</h3></div></div><dl><dt>Contact</dt><dd>{{ c.contact }}</dd><dt>Phone</dt><dd>{{ c.phone }}</dd><dt>GSTIN</dt><dd>{{ c.gstin|default:"—" }}</dd><dt>Address</dt><dd>{{ c.address }}</dd></dl></article>
+  <article class="glass reveal"><div class="section-head"><div><p class="eyebrow">Partner</p><h3>About {{ company.name }}</h3></div></div><p class="mut">{{ company.tagline }}.</p><div class="chips">{% for s in company.services %}<span>{{ s }}</span>{% endfor %}</div><dl><dt>Email</dt><dd>{{ company.email }}</dd><dt>Phone</dt><dd>{{ company.phone }}</dd><dt>Web</dt><dd>{{ company.web }}</dd><dt>Office</dt><dd>{{ company.address }}</dd></dl></article>
+  <article class="glass reveal"><div class="section-head"><div><p class="eyebrow">Billing</p><h3>Recent payments</h3></div><a href="{% url 'records' %}">All records</a></div>{% for x in recent %}<div class="row"><span><b>{{ x.invoice_no }}</b><small>{{ x.paid_at|date:"d M Y" }}</small></span><span>₹{{ x.amount|floatformat:0 }}</span><a href="{% url 'slip' x.pk %}">Receipt</a></div>{% empty %}<p class="mut empty-copy">Your completed payments and receipts will appear here automatically.</p>{% endfor %}</article>
+</section>
+
+<div id="modal" class="modal" aria-hidden="true"><div class="sheet glass">
+  <button class="x" id="closeM" aria-label="Close">×</button>
+  <div id="step1">
+    <p class="eyebrow">Secure checkout</p><h2>Pay ₹{{ p.amount|floatformat:0 }}</h2>
+    <p class="mut modal-copy">Choose UPI or debit/credit card. Payment confirmation and receipt generation are automatic after the gateway verifies the transaction.</p>
+    <div class="payment-methods" role="tablist" aria-label="Payment method">
+      <button type="button" class="payment-method active" data-method="upi"><span class="method-icon">◈</span><span><b>UPI & Apps</b><small>Google Pay, PhonePe, Paytm</small></span></button>
+      <button type="button" class="payment-method" data-method="card"><span class="method-icon">▱</span><span><b>Debit / Credit Card</b><small>Visa, Mastercard, RuPay & more</small></span></button>
+    </div>
+    <div id="upiPane" class="method-pane active">
+      <div class="scan" id="scanWrap"><img id="qr" alt="UPI payment QR"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><span class="laser"></span></div>
+      <div class="apps" id="apps"></div>
+      <button class="btn gateway-pay" type="button" id="gatewayUpi">Continue securely with UPI</button>
+    </div>
+    <div id="cardPane" class="method-pane">
+      <div class="card-visual" aria-hidden="true"><div class="card-chip"></div><span>TECHFINITYS SECURE</span><strong>••••&nbsp; ••••&nbsp; ••••&nbsp; 2026</strong><small>Debit / Credit</small></div>
+      <p class="mut card-note">Card details are entered on the payment gateway's secure checkout. Techfinitys never stores your full card number, CVV, or OTP.</p>
+      <button class="btn gateway-pay" type="button" id="gatewayCard">Pay securely by card</button>
+    </div>
+    <div class="verify-state"><span class="status-dot"></span><div><b id="verifyTitle">Ready for payment</b><small id="verifyText">Select a payment method to continue.</small></div></div>
+  </div>
+  <div id="step2" hidden>
+    <div class="success-ring"><svg class="tick" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none"/><path d="M14 27l8 8 16-17" fill="none"/></svg></div>
+    <p class="eyebrow">Payment verified</p><h2>Payment completed</h2>
+    <p class="mut modal-copy">Your annual licence payment has been confirmed. The payment record and receipt were created automatically.</p>
+    <div class="success-actions"><a class="btn" id="receiptLink" href="#">View payment slip</a><button class="ghost btn-ghost" id="donePayment" type="button">Back to dashboard</button></div>
+  </div>
+</div></div>
+{% endblock %}
+{% block js %}<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script><script>
+(()=>{
+ const $=s=>document.querySelector(s), csrf=document.cookie.match(/csrftoken=([^;]+)/)?.[1], pn=$('#payNow');
+ if(!pn) return;
+ let poll=null, paymentId=null, activeMethod='upi';
+ const stop=()=>{if(poll){clearInterval(poll);poll=null}};
+ const setState=(title,text)=>{$('#verifyTitle').textContent=title;$('#verifyText').textContent=text};
+ const check=async()=>{if(!paymentId)return;try{const r=await fetch(`/pay/${paymentId}/status/`,{headers:{'X-Requested-With':'XMLHttpRequest'}});const j=await r.json();if(j.status==='paid'){stop();$('#step1').hidden=true;$('#step2').hidden=false;$('#receiptLink').href=j.slip_url;if(window.confetti)window.confetti();}else if(j.status==='failed'){setState('Payment not completed','The last attempt failed or was cancelled. You can try again.');}}catch(e){}};
+ const beginPolling=()=>{stop();check();poll=setInterval(check,2200)};
+ const start=async(method)=>{
+   activeMethod=method; setState('Starting secure checkout','Connecting to the payment gateway…');
+   const body=new URLSearchParams({method});
+   const r=await fetch("{% url 'pay_start' %}",{method:'POST',headers:{'X-CSRFToken':csrf,'Content-Type':'application/x-www-form-urlencoded'},body});
+   const d=await r.json();
+   if(!r.ok){setState('Checkout unavailable',d.error||'Unable to start payment');return}
+   paymentId=d.id;
+   if(d.gateway==='cashfree' && d.payment_session_id){
+      setState('Waiting for secure payment','Complete the payment in the gateway window. Confirmation will update automatically.');
+      beginPolling();
+      try{const cashfree=Cashfree({mode:d.environment==='production'?'production':'sandbox'});await cashfree.checkout({paymentSessionId:d.payment_session_id,redirectTarget:'_modal'});check();}catch(e){setState('Checkout closed','If payment was completed, verification will update automatically. Otherwise, try again.');check();}
+      return;
+   }
+   if(d.gateway==='direct_upi'){
+      $('#qr').src=d.qr; $('#scanWrap').style.display='block'; $('#apps').innerHTML=Object.entries(d.apps).map(([n,u])=>`<a href="${u}" rel="noopener">${n}<span>↗</span></a>`).join('');
+      setState('UPI opened','Complete the payment in your UPI app. Automatic confirmation requires gateway credentials.');
+      beginPolling();
+   }
+ };
+ document.querySelectorAll('[data-method]').forEach(b=>b.addEventListener('click',()=>{
+   activeMethod=b.dataset.method; document.querySelectorAll('[data-method]').forEach(x=>x.classList.toggle('active',x===b));
+   $('#upiPane').classList.toggle('active',activeMethod==='upi');$('#cardPane').classList.toggle('active',activeMethod==='card');
+   setState('Ready for payment',activeMethod==='card'?'Continue to secure debit/credit card checkout.':'Continue with UPI or your preferred payment app.');
+ }));
+ pn.addEventListener('click',()=>{$('#modal').classList.add('open');$('#modal').setAttribute('aria-hidden','false');setState('Ready for payment','Select UPI or debit/credit card to continue.');});
+ $('#gatewayUpi').onclick=()=>start('upi');
+ $('#gatewayCard').onclick=()=>start('card');
+ $('#closeM').onclick=()=>{stop();$('#modal').classList.remove('open');$('#modal').setAttribute('aria-hidden','true')};
+ $('#donePayment').onclick=()=>location.reload();
+})();
+</script>{% endblock %}
