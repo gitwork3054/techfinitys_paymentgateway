@@ -91,9 +91,9 @@
     <div id="step1">
       <p class="eyebrow">UPI scanner</p>
       <h2>Pay by QR code</h2>
-      <p class="mut modal-copy">Scan the Techfinitys QR from any UPI app to complete the payment.</p>
+      <p class="mut modal-copy">Scan the Techfinitys&reg; QR from any UPI app to complete the payment.</p>
       <div class="scan supplied-qr" id="scanWrap">
-        <img id="qr" src="{% static 'portal/techfinitys-upi-qr.png' %}" alt="Techfinitys UPI payment QR">
+        <img id="qr" src="{% static 'portal/techfinitys-upi-qr.png' %}" alt="Techfinitys&reg; UPI payment QR">
         <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><span class="laser"></span>
       </div>
       <div class="verify-state">
@@ -104,6 +104,7 @@
         <div><span>UPI ID</span><strong id="upiIdText">6356981879@axisbank</strong></div>
         <div><span>Amount</span><strong id="upiAmountText">₹{{ selected_amount }}</strong></div>
       </div>
+      <a class="btn upi-open-btn" id="openUpiApps" href="#" hidden>Open UPI apps</a>
     </div>
 
     <div id="step2" hidden>
@@ -142,7 +143,7 @@
    paymentId=d.id;
    $('#upiIdText').textContent=d.upi_id||'6356981879@axisbank';
    $('#upiAmountText').textContent='₹'+formatAmount(d.amount||amountInput?.value);
-   setState('Scan to pay','Use any UPI app to scan this Techfinitys QR.');
+   setState('Scan to pay','Use any UPI app to scan this Techfinitys&reg; QR.');
    beginPolling();
  };
 
