@@ -222,6 +222,7 @@ def pay_start(r):
         "gateway": "direct_upi",
         "qr": "data:image/svg+xml;base64," + base64.b64encode(buf.getvalue()).decode(),
         "upi_id": settings.UPI_ID,
+        "upi_url": upi_url,
         "amount": f"{p.amount:.2f}",
     })
 
