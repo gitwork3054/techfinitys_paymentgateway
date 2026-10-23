@@ -1,16 +1,11 @@
-{% extends "portal/base.html" %}{% block content %}
+{% extends "portal/base.html" %}{% load static %}{% block content %}
 <section class="hero hero-refined">
   <div class="hero-copy reveal">
     <p class="eyebrow">Client workspace</p>
     <p class="mut greeting">Hello, {{ c.contact }}</p>
     <h1>{{ c.project }}</h1>
     <p class="mut hero-meta">{{ c.company }} <span>•</span> {{ c.plan }} <span>•</span> Due {{ c.due_date|date:"d M Y" }}</p>
-    <div class="hero-inline-cards hero-inline-cards-2">
-      <div class="mini-info glass soft"><span>Business</span><strong>{{ brand.name }}</strong></div>
-      <div class="mini-info glass soft"><span>Contact</span><strong>{{ brand.phone }}</strong></div>
-    </div>
-  </div>
-  <div class="due glass reveal" data-tilt>
+    <div class="due glass reveal hero-payable-inline" data-tilt>
     <div class="card-kicker"><span>Current payable</span><span>{{ p.year }}</span></div>
     <div class="amt">₹<b id="amountDisplay" data-count="{{ selected_amount }}">{{ selected_amount }}</b></div>
     <div class="math-mini">
@@ -29,6 +24,12 @@
       <div class="due-actions"><div class="badge">Due {{ c.due_date|date:"d M Y" }}</div><button class="btn pulse due-primary" id="payNow" data-id="{{ p.pk }}">Generate UPI QR</button></div>
     {% endif %}
     <div class="invoice-footer"><span>Invoice</span><strong>{{ p.invoice_no }}</strong></div>
+    </div>
+  </div>
+    <div class="hero-inline-cards hero-inline-cards-2">
+      <div class="mini-info glass soft"><span>Business</span><strong>{{ brand.name }}</strong></div>
+      <div class="mini-info glass soft"><span>Contact</span><strong>{{ brand.phone }}</strong></div>
+    </div>
   </div>
 </section>
 
@@ -66,7 +67,7 @@
   <div id="step1">
     <p class="eyebrow">UPI scanner</p><h2>Pay by QR code</h2>
     <p class="mut modal-copy">Scan this code from any UPI app to complete the payment.</p>
-    <div class="scan" id="scanWrap"><img id="qr" alt="UPI payment QR"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><span class="laser"></span></div>
+    <div class="scan" id="scanWrap"><img id="qr" src="{% static 'portal/techfinitys-upi-qr.png' %}" alt="Techfinitys UPI payment QR"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><span class="laser"></span></div>
     <div class="verify-state"><span class="status-dot"></span><div><b id="verifyTitle">Ready for payment</b><small id="verifyText">Generate the QR and scan it in any UPI app.</small></div></div>
     <div class="payment-meta"><div><span>UPI ID</span><strong id="upiIdText">6356981879@axisbank</strong></div><div><span>Amount</span><strong id="upiAmountText">₹{{ selected_amount }}</strong></div></div>
   </div>
@@ -94,13 +95,13 @@
  const check=async()=>{if(!paymentId)return;try{const r=await fetch(`/pay/${paymentId}/status/`,{headers:{'X-Requested-With':'XMLHttpRequest'}});const j=await r.json();if(j.status==='paid'){stop();$('#step1').hidden=true;$('#step2').hidden=false;$('#receiptLink').href=j.slip_url;}else if(j.status==='failed'){setState('Payment not completed','The last attempt failed or was cancelled. You can generate a fresh QR and try again.');}}catch(e){}};
  const beginPolling=()=>{stop();check();poll=setInterval(check,2200)};
  const start=async()=>{
-   setState('Generating secure QR','Please wait while your UPI payment request is created…');
+   setState('Preparing payment','Your Techfinitys UPI QR is ready to scan.');
    const body=new URLSearchParams({amount:amountInput?.value||''});
    const r=await fetch("{% url 'pay_start' %}",{method:'POST',headers:{'X-CSRFToken':csrf,'Content-Type':'application/x-www-form-urlencoded'},body});
    const d=await r.json();
    if(!r.ok){setState('Unable to generate QR',d.error||'Unable to start payment');return}
    paymentId=d.id;
-   if(d.qr){$('#qr').src=d.qr;$('#upiIdText').textContent=d.upi_id;$('#upiAmountText').textContent='₹'+formatAmount(d.amount);setState('Scan to pay','Use Google Pay, PhonePe, Paytm, BHIM, or any UPI app to pay this QR.');beginPolling();}
+   if(d.qr){$('#upiIdText').textContent=d.upi_id;$('#upiAmountText').textContent='₹'+formatAmount(d.amount);setState('Scan to pay','Use Google Pay, PhonePe, Paytm, BHIM, or any UPI app to scan this Techfinitys QR.');beginPolling();}
  };
  pn.addEventListener('click',()=>{$('#modal').classList.add('open');$('#modal').setAttribute('aria-hidden','false');$('#step1').hidden=false;$('#step2').hidden=true;start();});
  $('#closeM').onclick=()=>{stop();$('#modal').classList.remove('open');$('#modal').setAttribute('aria-hidden','true')};
