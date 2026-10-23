@@ -1,4 +1,5 @@
 import io, base64, hashlib, hmac, json, uuid
+from decimal import Decimal, InvalidOperation
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
@@ -39,6 +40,21 @@ def current_invoice(c):
         defaults={"invoice_no": f"TFY-{yr}-{c.pk:03d}", "amount": c.yearly_amount},
     )
     return p
+
+
+def brand_context(c, p=None):
+    amount = p.amount if p else c.yearly_amount
+    try:
+        amount_int = int(amount)
+    except Exception:
+        amount_int = 0
+    return {
+        "company": settings.COMPANY,
+        "brand": settings.CLIENT_BRAND,
+        "package": settings.PACKAGE_DETAILS,
+        "quick_amounts": settings.PACKAGE_DETAILS.get("quick_amounts", []),
+        "selected_amount": amount_int,
+    }
 
 
 def cashfree_configured():
@@ -143,24 +159,24 @@ def dashboard(r):
     returned_order = r.GET.get("payment_return")
     if returned_order and p.provider_order_id == returned_order:
         p = cashfree_sync(p, r)
-    return render(r, "portal/dashboard.html", {
-        "c": c,
-        "p": p,
-        "company": settings.COMPANY,
-        "recent": c.payments.filter(status="paid")[:3],
-    })
-
+    ctx = {"c": c, "p": p, "recent": c.payments.filter(status="paid")[:3]}
+    ctx.update(brand_context(c, p))
+    return render(r, "portal/dashboard.html", ctx)
 
 @login_required
 def records(r):
     c = client_of(r)
-    return render(r, "portal/records.html", {"c": c, "payments": c.payments.all(), "logs": c.logs.all()[:60]})
-
+    p = current_invoice(c)
+    ctx = {"c": c, "p": p, "payments": c.payments.all(), "logs": c.logs.all()[:60]}
+    ctx.update(brand_context(c, p))
+    return render(r, "portal/records.html", ctx)
 
 @login_required
 def profile(r):
-    return render(r, "portal/profile.html", {"c": client_of(r), "company": settings.COMPANY})
-
+    c = client_of(r)
+    ctx = {"c": c}
+    ctx.update(brand_context(c, current_invoice(c)))
+    return render(r, "portal/profile.html", ctx)
 
 @login_required
 @require_POST
@@ -170,35 +186,22 @@ def pay_start(r):
     if p.status == "paid":
         return JsonResponse({"error": "This invoice is already paid."}, status=400)
 
-    method = (r.POST.get("method") or "upi").lower()
-    if method not in {"upi", "card"}:
-        return JsonResponse({"error": "Unsupported payment method."}, status=400)
-
-    if cashfree_configured():
+    amount_raw = (r.POST.get("amount") or "").replace(",", "").replace("₹", "").strip()
+    if amount_raw:
         try:
-            data = cashfree_create_order(r, c, p, method)
-        except RuntimeError as e:
-            log(r, c, "PAYMENT_GATEWAY_ERROR", str(e), p)
-            return JsonResponse({"error": "Payment gateway could not start checkout. Please try again."}, status=502)
-        log(r, c, "PAYMENT_INITIATED", f"{p.invoice_no} · Cashfree · {method} · {p.provider_order_id}", p)
-        return JsonResponse({
-            "id": p.pk,
-            "order_id": p.provider_order_id,
-            "gateway": "cashfree",
-            "environment": settings.CASHFREE_ENV,
-            "method": method,
-            "payment_session_id": data.get("payment_session_id"),
-        })
-
-    if method == "card":
-        return JsonResponse({
-            "error": "Card payments require Cashfree merchant credentials. Add CASHFREE_CLIENT_ID and CASHFREE_CLIENT_SECRET first."
-        }, status=503)
+            amount = Decimal(amount_raw)
+        except InvalidOperation:
+            return JsonResponse({"error": "Enter a valid payable amount."}, status=400)
+        if amount <= 0:
+            return JsonResponse({"error": "Amount must be greater than zero."}, status=400)
+        p.amount = amount.quantize(Decimal("0.01"))
+        p.save(update_fields=["amount"])
 
     p.provider = "Direct UPI"
     p.provider_order_id = f"TFY-{p.pk}-{uuid.uuid4().hex[:12].upper()}"
     p.app = "UPI"
     p.save(update_fields=["provider", "provider_order_id", "app"])
+
     q = urlencode({
         "pa": settings.UPI_ID,
         "pn": settings.UPI_NAME,
@@ -209,19 +212,18 @@ def pay_start(r):
     })
     upi_url = "upi://pay?" + q
     img = qrcode.make(upi_url, image_factory=qrcode.image.svg.SvgPathImage, box_size=10)
-    buf = io.BytesIO(); img.save(buf)
-    log(r, c, "PAYMENT_INITIATED", f"{p.invoice_no} · direct UPI demo", p)
-    return JsonResponse({
-        "id": p.pk, "order_id": p.provider_order_id, "gateway": "direct_upi",
-        "qr": "data:image/svg+xml;base64," + base64.b64encode(buf.getvalue()).decode(),
-        "apps": {
-            "Google Pay": "tez://upi/pay?" + q,
-            "PhonePe": "phonepe://pay?" + q,
-            "Paytm": "paytmmp://pay?" + q,
-            "Any UPI app": upi_url,
-        },
-    })
+    buf = io.BytesIO()
+    img.save(buf)
+    log(r, c, "PAYMENT_INITIATED", f"{p.invoice_no} · direct UPI · amount {p.amount}", p)
 
+    return JsonResponse({
+        "id": p.pk,
+        "order_id": p.provider_order_id,
+        "gateway": "direct_upi",
+        "qr": "data:image/svg+xml;base64," + base64.b64encode(buf.getvalue()).decode(),
+        "upi_id": settings.UPI_ID,
+        "amount": f"{p.amount:.2f}",
+    })
 
 @login_required
 @require_GET
