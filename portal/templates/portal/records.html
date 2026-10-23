@@ -1,5 +1,90 @@
 {% extends "portal/base.html" %}{% block content %}
-<section class="page-title reveal"><div><p class="eyebrow">Billing history</p><h1>Payment records</h1><p class="mut">Verified transactions, receipts and account activity in one place.</p></div></section>
-<section class="glass tbl reveal"><div class="section-head"><div><p class="eyebrow">Transactions</p><h3>Payments</h3></div></div><table><thead><tr><th>Invoice</th><th>Year</th><th>Amount</th><th>Status</th><th>Provider reference</th><th>Date</th><th></th></tr></thead><tbody>{% for p in payments %}<tr><td><b>{{ p.invoice_no }}</b></td><td>{{ p.year }}</td><td>₹{{ p.amount|floatformat:0 }}</td><td><span class="badge {% if p.status == 'paid' %}ok{% endif %}">{{ p.get_status_display }}</span></td><td>{{ p.provider_payment_id|default:"—" }}</td><td>{{ p.paid_at|date:"d M Y, H:i"|default:"—" }}</td><td>{% if p.status == "paid" %}<a href="{% url 'slip' p.pk %}">Receipt</a>{% endif %}</td></tr>{% endfor %}</tbody></table></section>
-<section class="glass tbl reveal"><div class="section-head"><div><p class="eyebrow">Audit trail</p><h3>Activity log</h3></div></div><div class="timeline">{% for l in logs %}<div><time>{{ l.at|date:"d M Y, H:i:s" }}</time><b>{{ l.event }}</b><span class="mut">{{ l.detail }}{% if l.ip %} · {{ l.ip }}{% endif %}</span></div>{% empty %}<p class="mut">Payment activity will be logged here.</p>{% endfor %}</div></section>
+<section class="page-title reveal records-hero"><div><p class="eyebrow">Billing history</p><h1>Payment records</h1><p class="mut">Verified transactions, package details, and account activity in one refined workspace.</p></div></section>
+
+<section class="records-summary grid grid-3 reveal">
+  <article class="glass stat-card"><span>Client</span><strong>{{ brand.name }}</strong><small>{{ brand.location }}</small></article>
+  <article class="glass stat-card"><span>Recommended payable</span><strong>₹3,00,000</strong><small>₹2,00,000 package + ₹1,00,000 ads</small></article>
+  <article class="glass stat-card"><span>Next due date</span><strong>{{ c.due_date|date:"d M Y" }}</strong><small>Payable amount is customisable by client</small></article>
+</section>
+
+<section class="records-layout reveal">
+  <article class="glass proposal-card">
+    <div class="section-head"><div><p class="eyebrow">Proposal</p><h3>{{ package.title }}</h3></div></div>
+    <p class="mut">{{ package.monthly_price }}</p>
+    <p class="mut proposal-copy">{{ package.summary }}</p>
+
+    <div class="proposal-columns">
+      <div>
+        <h4>Includes</h4>
+        <ul class="feature-list compact">{% for item in package.includes %}<li>{{ item }}</li>{% endfor %}</ul>
+      </div>
+      <div>
+        <h4>Changes allowance</h4>
+        <ul class="feature-list compact">{% for item in package.changes %}<li>{{ item }}</li>{% endfor %}</ul>
+      </div>
+    </div>
+
+    <div class="pricing-box">
+      <h4>Package pricing</h4>
+      <div class="price-lines">{% for row in package.pricing %}<div class="price-line"><span>{{ row.label }}</span><b>{{ row.discounted }}</b><small>Actual {{ row.actual }} · Saved {{ row.saved }}</small></div>{% endfor %}</div>
+    </div>
+
+    <div class="pricing-box math-box">
+      <h4>Billing maths</h4>
+      {% for item in package.proposal_math %}<div class="math-row {% if item.highlight %}strong{% endif %}"><span>{{ item.label }}</span><b>{{ item.value }}</b></div>{% endfor %}
+    </div>
+
+    <div class="notes-box">
+      <h4>Important notes</h4>
+      <ul class="feature-list compact">{% for item in package.notes %}<li>{{ item }}</li>{% endfor %}</ul>
+    </div>
+  </article>
+
+  <aside class="records-side">
+    <article class="glass side-card">
+      <p class="eyebrow">Client info</p>
+      <h3>{{ brand.name }}</h3>
+      <dl>
+        <dt>Business</dt><dd>{{ brand.about }}</dd>
+        <dt>Phone</dt><dd>{{ brand.phone }}</dd>
+        <dt>Hours</dt><dd>{{ brand.hours }}</dd>
+        <dt>Rating</dt><dd>{{ brand.rating }}</dd>
+      </dl>
+    </article>
+
+    <article class="glass side-card">
+      <p class="eyebrow">Techfinitys</p>
+      <h3>Payment details</h3>
+      <dl>
+        <dt>Name</dt><dd>{{ company.name }}</dd>
+        <dt>UPI ID</dt><dd>6356981879@axisbank</dd>
+        <dt>Acc No</dt><dd>{{ company.acc_no }}</dd>
+        <dt>IFSC</dt><dd>{{ company.ifsc }}</dd>
+        <dt>Website</dt><dd><a href="{{ company.web }}" target="_blank" rel="noopener">{{ company.web }}</a></dd>
+      </dl>
+    </article>
+  </aside>
+</section>
+
+<section class="glass tbl reveal responsive-table">
+  <div class="section-head"><div><p class="eyebrow">Transactions</p><h3>Payments</h3></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Invoice</th><th>Year</th><th>Amount</th><th>Status</th><th>Provider reference</th><th>Date</th><th></th></tr></thead><tbody>
+  {% for p in payments %}
+    <tr>
+      <td data-label="Invoice"><b>{{ p.invoice_no }}</b></td>
+      <td data-label="Year">{{ p.year }}</td>
+      <td data-label="Amount">₹{{ p.amount|floatformat:0 }}</td>
+      <td data-label="Status"><span class="badge {% if p.status == 'paid' %}ok{% endif %}">{{ p.get_status_display }}</span></td>
+      <td data-label="Provider reference">{{ p.provider_payment_id|default:"—" }}</td>
+      <td data-label="Date">{{ p.paid_at|date:"d M Y, H:i"|default:"—" }}</td>
+      <td data-label="Receipt">{% if p.status == "paid" %}<a href="{% url 'slip' p.pk %}">Receipt</a>{% else %}<span class="mut">—</span>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody></table></div>
+</section>
+
+<section class="glass tbl reveal">
+  <div class="section-head"><div><p class="eyebrow">Audit trail</p><h3>Activity log</h3></div></div>
+  <div class="timeline">{% for l in logs %}<div><time>{{ l.at|date:"d M Y, H:i:s" }}</time><b>{{ l.event }}</b><span class="mut">{{ l.detail }}{% if l.ip %} · {{ l.ip }}{% endif %}</span></div>{% empty %}<p class="mut">Payment activity will be logged here.</p>{% endfor %}</div>
+</section>
 {% endblock %}
