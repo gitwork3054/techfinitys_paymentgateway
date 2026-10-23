@@ -20,27 +20,27 @@ services:
         generateValue: true
       - key: DJANGO_DEBUG
         value: "false"
-      - key: DJANGO_SUPERUSER_USERNAME
-        value: admin
-      - key: DJANGO_SUPERUSER_PASSWORD
-        sync: false
       - key: CLIENT_USERNAME
         value: client
       - key: CLIENT_PASSWORD
         sync: false
       - key: CLIENT_COMPANY
-        value: Aarav Industries Pvt Ltd
+        value: Ashapura Rakhi
       - key: CLIENT_CONTACT
-        value: Aarav Mehta
+        value: Ashapura Rakhi
+      - key: CLIENT_PHONE
+        value: "8401947462"
+      - key: CLIENT_ADDRESS
+        value: Opposite Old Laxmipura Police Station, Laxmipura Road, Vadodara, Gujarat
       - key: CLIENT_PROJECT
-        value: ERP & Inventory Suite
+        value: Festive Growth & Billing Suite
       - key: CLIENT_PLAN
-        value: Enterprise Annual
+        value: Premium Brand Growth Plan
       - key: CLIENT_YEARLY_AMOUNT
-        value: "400000"
+        value: "300000"
       - key: CLIENT_DUE_DATE
-        value: "2026-12-31"
+        value: "2026-12-28"
       - key: CASHFREE_ENV
         value: sandbox
       - key: PAYMENT_PROVIDER
-        value: Cashfree
+        value: UPI Gateway
