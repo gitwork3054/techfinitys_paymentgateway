@@ -250,3 +250,157 @@ body.auth main{padding-top:0}
   .login-wrap{grid-template-columns:minmax(0,1fr) minmax(390px,.72fr);gap:46px}
   .login-copy h1{font-size:clamp(3.4rem,5.2vw,5rem)}
 }
+
+/* DASHBOARD POLISH */
+.shell-nav{padding-inline:2px}
+.nav{border-bottom-color:color-mix(in srgb,var(--line) 84%,transparent)}
+.brand{white-space:nowrap}
+.hero{
+  grid-template-columns:minmax(0,1.42fr) minmax(340px,.58fr);
+  gap:44px;
+  align-items:center;
+  min-height:470px
+}
+.hero-copy{padding:48px 0 36px}
+.hero-copy .greeting{margin:22px 0 20px;font-size:1rem}
+.hero-copy h1{max-width:760px;font-size:clamp(4rem,6.2vw,6.15rem);line-height:.9}
+.hero-meta{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px 0}
+.hero-meta span{padding-inline:10px}
+.due{
+  min-height:286px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  padding:28px;
+  overflow:hidden
+}
+.card-kicker{align-items:center}
+.card-kicker span:last-child{font-variant-numeric:tabular-nums}
+.due .amt{
+  margin:26px 0 22px;
+  white-space:nowrap;
+  font-size:clamp(3rem,4.8vw,4.8rem)
+}
+.due-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap
+}
+.due-actions .badge{min-height:44px;align-items:center}
+.due-primary{
+  margin:0;
+  min-width:112px;
+  min-height:44px;
+  padding:11px 18px
+}
+.invoice-footer{
+  margin-top:auto;
+  padding-top:20px;
+  border-top:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  color:var(--muted);
+  font-size:.76rem
+}
+.invoice-footer strong{
+  color:var(--text);
+  font-size:.86rem;
+  font-weight:700;
+  white-space:nowrap;
+  letter-spacing:.02em
+}
+.metrics{margin:30px 0;gap:16px}
+.metric{
+  min-height:86px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center
+}
+.metric strong{font-size:1.02rem}
+.dashboard-grid{
+  align-items:stretch;
+  grid-template-columns:repeat(3,minmax(0,1fr))
+}
+.dashboard-grid>article{
+  min-height:100%;
+  padding:26px
+}
+.dashboard-grid .section-head{align-items:flex-start}
+.dashboard-grid .section-head>a{
+  color:var(--text);
+  font-size:.84rem;
+  white-space:nowrap
+}
+.dashboard-grid h3{margin-top:3px}
+.empty-copy{margin:20px 0 0;max-width:29ch}
+.row span:nth-child(2){font-weight:700;white-space:nowrap}
+.chips{margin-bottom:24px}
+.chips span{background:color-mix(in srgb,var(--panel) 74%,transparent)}
+main{overflow-x:clip}
+
+/* better top navigation spacing */
+.nav nav{gap:6px}
+.nav nav>a,.ghost,.theme-toggle{min-height:42px;display:inline-flex;align-items:center;justify-content:center}
+.nav form{margin:0}
+.ghost{white-space:nowrap}
+
+/* tablet */
+@media(max-width:1120px){
+  .hero{
+    grid-template-columns:1fr;
+    gap:22px;
+    min-height:auto;
+    padding-top:10px
+  }
+  .hero-copy{padding-bottom:12px}
+  .hero-copy h1{max-width:900px;font-size:clamp(3.6rem,9vw,5.4rem)}
+  .due{max-width:680px;min-height:auto}
+  .dashboard-grid{grid-template-columns:1fr 1fr}
+}
+
+/* mobile nav + cards */
+@media(max-width:760px){
+  .nav{
+    height:auto;
+    min-height:68px;
+    padding-block:12px;
+    gap:12px
+  }
+  .nav nav{gap:4px}
+  .nav nav>a{display:none}
+  .brand{font-size:1.04rem}
+  .theme-toggle{width:38px;height:38px}
+  .ghost{padding-inline:10px}
+  .hero-copy{padding-top:24px}
+  .hero-copy h1{font-size:clamp(3rem,15vw,4.3rem)}
+  .hero-meta{font-size:.9rem;line-height:1.6}
+  .due{
+    width:100%;
+    padding:22px;
+    border-radius:20px
+  }
+  .due .amt{font-size:clamp(2.7rem,13vw,4rem)}
+  .due-actions{
+    display:grid;
+    grid-template-columns:1fr;
+    align-items:stretch
+  }
+  .due-actions .badge,.due-primary{width:100%;justify-content:center}
+  .invoice-footer{align-items:flex-start;flex-direction:column;gap:4px}
+  .metrics,.dashboard-grid{grid-template-columns:1fr}
+  .metric{min-height:78px}
+  .dashboard-grid>article{padding:22px}
+  .section-head{align-items:flex-start}
+}
+
+/* very small screens */
+@media(max-width:420px){
+  .shell-nav,main{width:calc(100% - 20px)}
+  .nav{padding-inline:0}
+  .hero-copy h1{font-size:clamp(2.7rem,16vw,3.8rem)}
+  .hero-meta span{padding-inline:6px}
+  dl{grid-template-columns:88px 1fr}
+}
