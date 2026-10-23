@@ -1,31 +1,48 @@
 {% extends "portal/base.html" %}{% load static %}{% block content %}
-<section class="hero hero-refined">
+<section class="hero hero-refined hero-single">
   <div class="hero-copy reveal">
     <p class="eyebrow">Client workspace</p>
     <p class="mut greeting">Hello, {{ c.contact }}</p>
-    <h1>{{ c.project }}</h1>
+    <h1>Billing Suite</h1>
     <p class="mut hero-meta">{{ c.company }} <span>•</span> {{ c.plan }} <span>•</span> Due {{ c.due_date|date:"d M Y" }}</p>
+
     <div class="due glass reveal hero-payable-inline" data-tilt>
-    <div class="card-kicker"><span>Current payable</span><span>{{ p.year }}</span></div>
-    <div class="amt">₹<b id="amountDisplay" data-count="{{ selected_amount }}">{{ selected_amount }}</b></div>
-    <div class="math-mini">
-      {% for item in package.proposal_math %}
-        <div class="math-row {% if item.highlight %}strong{% endif %}"><span>{{ item.label }}</span><b>{{ item.value }}</b></div>
-      {% endfor %}
-    </div>
-    {% if p.status == "paid" %}
-      <div class="due-actions"><div class="badge ok">Payment completed · {{ p.paid_at|date:"d M Y" }}</div><a class="btn due-primary" href="{% url 'slip' p.pk %}">View payment slip</a></div>
-    {% else %}
-      <div class="payable-box">
-        <label for="payableAmount">Payable amount</label>
-        <div class="amount-input-wrap"><span>₹</span><input id="payableAmount" type="number" min="1" step="1" value="{{ selected_amount }}"></div>
-        <div class="quick-amounts">{% for amt in quick_amounts %}<button type="button" class="quick-pill" data-amount="{{ amt }}">₹{{ amt }}</button>{% endfor %}</div>
+      <div class="card-kicker"><span>Current payable</span><span>{{ p.year }}</span></div>
+      <div class="amt">₹<b id="amountDisplay" data-count="{{ selected_amount }}">{{ selected_amount }}</b></div>
+
+      <div class="math-mini">
+        {% for item in package.proposal_math %}
+          <div class="math-row {% if item.highlight %}strong{% endif %}"><span>{{ item.label }}</span><b>{{ item.value }}</b></div>
+        {% endfor %}
       </div>
-      <div class="due-actions"><div class="badge">Due {{ c.due_date|date:"d M Y" }}</div><button class="btn pulse due-primary" id="payNow" data-id="{{ p.pk }}">Generate UPI QR</button></div>
-    {% endif %}
-    <div class="invoice-footer"><span>Invoice</span><strong>{{ p.invoice_no }}</strong></div>
+
+      {% if p.status == "paid" %}
+        <div class="due-actions">
+          <div class="badge ok">Payment completed · {{ p.paid_at|date:"d M Y" }}</div>
+          <a class="btn due-primary" href="{% url 'slip' p.pk %}">View payment slip</a>
+        </div>
+      {% else %}
+        <div class="payable-box">
+          <label for="payableAmount">Payable amount</label>
+          <div class="amount-input-wrap">
+            <span>₹</span>
+            <input id="payableAmount" type="number" min="1" step="1" value="{{ selected_amount }}">
+          </div>
+          <div class="quick-amounts">
+            {% for amt in quick_amounts %}
+              <button type="button" class="quick-pill" data-amount="{{ amt }}">₹{{ amt }}</button>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="due-actions">
+          <div class="badge">Due {{ c.due_date|date:"d M Y" }}</div>
+          <button class="btn pulse due-primary" id="payNow" data-id="{{ p.pk }}">Show UPI QR</button>
+        </div>
+      {% endif %}
+
+      <div class="invoice-footer"><span>Invoice</span><strong>{{ p.invoice_no }}</strong></div>
     </div>
-  </div>
+
     <div class="hero-inline-cards hero-inline-cards-2">
       <div class="mini-info glass soft"><span>Business</span><strong>{{ brand.name }}</strong></div>
       <div class="mini-info glass soft"><span>Contact</span><strong>{{ brand.phone }}</strong></div>
@@ -51,34 +68,54 @@
       <dt>Wholesale</dt><dd>{{ brand.wholesale }}</dd>
     </dl>
   </article>
+
   <article class="glass reveal">
     <div class="section-head"><div><p class="eyebrow">Package details</p><h3>{{ package.title }}</h3></div></div>
     <p class="mut">{{ package.summary }}</p>
     <ul class="feature-list">{% for item in package.includes %}<li>{{ item }}</li>{% endfor %}</ul>
   </article>
+
   <article class="glass reveal">
     <div class="section-head"><div><p class="eyebrow">Billing</p><h3>Recent payments</h3></div><a href="{% url 'records' %}">All records</a></div>
-    {% for x in recent %}<div class="row"><span><b>{{ x.invoice_no }}</b><small>{{ x.paid_at|date:"d M Y" }}</small></span><span>₹{{ x.amount|floatformat:0 }}</span><a href="{% url 'slip' x.pk %}">Receipt</a></div>{% empty %}<p class="mut empty-copy">Your completed payments and receipts will appear here automatically.</p>{% endfor %}
+    {% for x in recent %}
+      <div class="row"><span><b>{{ x.invoice_no }}</b><small>{{ x.paid_at|date:"d M Y" }}</small></span><span>₹{{ x.amount|floatformat:0 }}</span><a href="{% url 'slip' x.pk %}">Receipt</a></div>
+    {% empty %}
+      <p class="mut empty-copy">Your completed payments and receipts will appear here automatically.</p>
+    {% endfor %}
   </article>
 </section>
 
-<div id="modal" class="modal" aria-hidden="true"><div class="sheet glass">
-  <button class="x" id="closeM" aria-label="Close">×</button>
-  <div id="step1">
-    <p class="eyebrow">UPI scanner</p><h2>Pay by QR code</h2>
-    <p class="mut modal-copy">Scan this code from any UPI app to complete the payment.</p>
-    <div class="scan" id="scanWrap"><img id="qr" src="{% static 'portal/techfinitys-upi-qr.png' %}" alt="Techfinitys UPI payment QR"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><span class="laser"></span></div>
-    <div class="verify-state"><span class="status-dot"></span><div><b id="verifyTitle">Ready for payment</b><small id="verifyText">Generate the QR and scan it in any UPI app.</small></div></div>
-    <div class="payment-meta"><div><span>UPI ID</span><strong id="upiIdText">6356981879@axisbank</strong></div><div><span>Amount</span><strong id="upiAmountText">₹{{ selected_amount }}</strong></div></div>
+<div id="modal" class="modal" aria-hidden="true">
+  <div class="sheet glass">
+    <button class="x" id="closeM" aria-label="Close">×</button>
+    <div id="step1">
+      <p class="eyebrow">UPI scanner</p>
+      <h2>Pay by QR code</h2>
+      <p class="mut modal-copy">Scan the Techfinitys QR from any UPI app to complete the payment.</p>
+      <div class="scan supplied-qr" id="scanWrap">
+        <img id="qr" src="{% static 'portal/techfinitys-upi-qr.png' %}" alt="Techfinitys UPI payment QR">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><span class="laser"></span>
+      </div>
+      <div class="verify-state">
+        <span class="status-dot"></span>
+        <div><b id="verifyTitle">Ready for payment</b><small id="verifyText">Scan this QR in Google Pay, PhonePe, Paytm, BHIM, or any UPI app.</small></div>
+      </div>
+      <div class="payment-meta">
+        <div><span>UPI ID</span><strong id="upiIdText">6356981879@axisbank</strong></div>
+        <div><span>Amount</span><strong id="upiAmountText">₹{{ selected_amount }}</strong></div>
+      </div>
+    </div>
+
+    <div id="step2" hidden>
+      <div class="success-ring"><svg class="tick" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none"/><path d="M14 27l8 8 16-17" fill="none"/></svg></div>
+      <p class="eyebrow">Payment verified</p><h2>Payment completed</h2>
+      <p class="mut modal-copy">Your payment has been confirmed. The payment record and receipt were created automatically.</p>
+      <div class="success-actions"><a class="btn" id="receiptLink" href="#">View payment slip</a><button class="ghost btn-ghost" id="donePayment" type="button">Back to dashboard</button></div>
+    </div>
   </div>
-  <div id="step2" hidden>
-    <div class="success-ring"><svg class="tick" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none"/><path d="M14 27l8 8 16-17" fill="none"/></svg></div>
-    <p class="eyebrow">Payment verified</p><h2>Payment completed</h2>
-    <p class="mut modal-copy">Your payment has been confirmed. The payment record and receipt were created automatically.</p>
-    <div class="success-actions"><a class="btn" id="receiptLink" href="#">View payment slip</a><button class="ghost btn-ghost" id="donePayment" type="button">Back to dashboard</button></div>
-  </div>
-</div></div>
+</div>
 {% endblock %}
+
 {% block js %}<script>
 (()=>{
  const $=s=>document.querySelector(s), csrf=document.cookie.match(/csrftoken=([^;]+)/)?.[1], pn=$('#payNow');
@@ -90,20 +127,32 @@
  amountInput?.addEventListener('input',syncAmount);
  document.querySelectorAll('.quick-pill').forEach(b=>b.addEventListener('click',()=>{amountInput.value=b.dataset.amount;syncAmount();}));
  syncAmount();
+
  const stop=()=>{if(poll){clearInterval(poll);poll=null}};
  const setState=(title,text)=>{$('#verifyTitle').textContent=title;$('#verifyText').textContent=text};
- const check=async()=>{if(!paymentId)return;try{const r=await fetch(`/pay/${paymentId}/status/`,{headers:{'X-Requested-With':'XMLHttpRequest'}});const j=await r.json();if(j.status==='paid'){stop();$('#step1').hidden=true;$('#step2').hidden=false;$('#receiptLink').href=j.slip_url;}else if(j.status==='failed'){setState('Payment not completed','The last attempt failed or was cancelled. You can generate a fresh QR and try again.');}}catch(e){}};
+ const check=async()=>{if(!paymentId)return;try{const r=await fetch(`/pay/${paymentId}/status/`,{headers:{'X-Requested-With':'XMLHttpRequest'}});const j=await r.json();if(j.status==='paid'){stop();$('#step1').hidden=true;$('#step2').hidden=false;$('#receiptLink').href=j.slip_url;}else if(j.status==='failed'){setState('Payment not completed','The last attempt failed or was cancelled. You can try again.');}}catch(e){}};
  const beginPolling=()=>{stop();check();poll=setInterval(check,2200)};
+
  const start=async()=>{
    setState('Preparing payment','Your Techfinitys UPI QR is ready to scan.');
    const body=new URLSearchParams({amount:amountInput?.value||''});
    const r=await fetch("{% url 'pay_start' %}",{method:'POST',headers:{'X-CSRFToken':csrf,'Content-Type':'application/x-www-form-urlencoded'},body});
    const d=await r.json();
-   if(!r.ok){setState('Unable to generate QR',d.error||'Unable to start payment');return}
+   if(!r.ok){setState('Unable to start payment',d.error||'Unable to start payment');return}
    paymentId=d.id;
-   if(d.qr){$('#upiIdText').textContent=d.upi_id;$('#upiAmountText').textContent='₹'+formatAmount(d.amount);setState('Scan to pay','Use Google Pay, PhonePe, Paytm, BHIM, or any UPI app to scan this Techfinitys QR.');beginPolling();}
+   $('#upiIdText').textContent=d.upi_id||'6356981879@axisbank';
+   $('#upiAmountText').textContent='₹'+formatAmount(d.amount||amountInput?.value);
+   setState('Scan to pay','Use any UPI app to scan this Techfinitys QR.');
+   beginPolling();
  };
- pn.addEventListener('click',()=>{$('#modal').classList.add('open');$('#modal').setAttribute('aria-hidden','false');$('#step1').hidden=false;$('#step2').hidden=true;start();});
+
+ pn.addEventListener('click',()=>{
+   $('#modal').classList.add('open');
+   $('#modal').setAttribute('aria-hidden','false');
+   $('#step1').hidden=false;
+   $('#step2').hidden=true;
+   start();
+ });
  $('#closeM').onclick=()=>{stop();$('#modal').classList.remove('open');$('#modal').setAttribute('aria-hidden','true')};
  $('#donePayment').onclick=()=>location.reload();
 })();
