@@ -1,4 +1,22 @@
 {% extends "portal/base.html" %}{% block content %}
-<section class="profile-hero glass reveal"><div class="avatar">{{ c.contact|slice:":1" }}</div><div><p class="eyebrow">Client profile</p><h1>{{ c.contact }}</h1><p class="mut">{{ c.company }}</p></div><div class="profile-status"><span class="status-dot solid"></span>Active account</div></section>
-<section class="grid profile-grid"><article class="glass reveal"><p class="eyebrow">Identity</p><h3>Client details</h3><dl><dt>Username</dt><dd>{{ user.username }}</dd><dt>Phone</dt><dd>{{ c.phone }}</dd><dt>GSTIN</dt><dd>{{ c.gstin|default:"—" }}</dd><dt>Address</dt><dd>{{ c.address }}</dd></dl></article><article class="glass reveal"><p class="eyebrow">Subscription</p><h3>Licence</h3><dl><dt>Project</dt><dd>{{ c.project }}</dd><dt>Plan</dt><dd>{{ c.plan }}</dd><dt>Annual fee</dt><dd>₹{{ c.yearly_amount|floatformat:0 }}</dd><dt>Next due</dt><dd>{{ c.due_date|date:"d M Y" }}</dd></dl></article><article class="glass reveal"><p class="eyebrow">Your partner</p><h3>{{ company.name }}</h3><dl><dt>Email</dt><dd>{{ company.email }}</dd><dt>Phone</dt><dd>{{ company.phone }}</dd><dt>Office</dt><dd>{{ company.address }}</dd><dt>Web</dt><dd>{{ company.web }}</dd></dl></article></section>
+<section class="profile-hero glass reveal">
+  <div class="avatar">{{ c.contact|slice:":1" }}</div>
+  <div><p class="eyebrow">Client profile</p><h1>{{ brand.name }}</h1><p class="mut">{{ brand.about }}</p></div>
+  <div class="profile-status"><span class="status-dot solid"></span>Active account</div>
+</section>
+
+<section class="grid profile-grid advanced-grid">
+  <article class="glass reveal">
+    <p class="eyebrow">Identity</p><h3>Client details</h3>
+    <dl><dt>Username</dt><dd>{{ user.username }}</dd><dt>Contact</dt><dd>{{ c.contact }}</dd><dt>Phone</dt><dd>{{ brand.phone }}</dd><dt>Address</dt><dd>{{ brand.location }}</dd></dl>
+  </article>
+  <article class="glass reveal">
+    <p class="eyebrow">Subscription</p><h3>Package overview</h3>
+    <dl><dt>Project</dt><dd>{{ c.project }}</dd><dt>Plan</dt><dd>{{ package.title }}</dd><dt>Suggested total</dt><dd>₹3,00,000</dd><dt>Next due</dt><dd>{{ c.due_date|date:"d M Y" }}</dd></dl>
+  </article>
+  <article class="glass reveal">
+    <p class="eyebrow">Your partner</p><h3>{{ company.name }}</h3>
+    <dl><dt>Phone</dt><dd>{{ company.phone }}</dd><dt>Acc No</dt><dd>{{ company.acc_no }}</dd><dt>IFSC</dt><dd>{{ company.ifsc }}</dd><dt>Web</dt><dd><a href="{{ company.web }}" target="_blank" rel="noopener">{{ company.web }}</a></dd></dl>
+  </article>
+</section>
 {% endblock %}
