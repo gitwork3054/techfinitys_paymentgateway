@@ -13,7 +13,7 @@
     <form method="post">
       {% csrf_token %}
       {% if form.errors %}<p class="err">Username or password is incorrect.</p>{% endif %}
-      <label>Username<input name="username" autocomplete="username" autofocus required></label>
+      <label>Username<input name="username" value="ashapurarakhi" autocomplete="username" autocapitalize="none" spellcheck="false" autofocus required></label>
       <label>Password
         <span class="password-field">
           <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
@@ -22,7 +22,7 @@
           </button>
         </span>
       </label>
-      <button class="btn login-btn">Sign in <span>→</span></button>
+      <label class="remember-row"><input type="checkbox" name="remember" id="rememberLogin"><span>Remember username & keep me signed in</span></label>\n      <p class="login-security-note">Your browser can securely offer to save the password using its password manager.</p>\n      <button class="btn login-btn">Sign in <span>→</span></button>
     </form>
   </section>
 </section>
