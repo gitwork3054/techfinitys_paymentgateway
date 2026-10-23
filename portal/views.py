@@ -6,6 +6,7 @@ from urllib.error import HTTPError, URLError
 import qrcode, qrcode.image.svg
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
 from django.db import transaction
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
@@ -14,6 +15,19 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from .models import Payment, PaymentLog
+
+
+class RememberLoginView(LoginView):
+    template_name = "portal/login.html"
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        remember = self.request.POST.get("remember") == "on"
+        if remember:
+            self.request.session.set_expiry(60 * 60 * 24 * 30)
+        else:
+            self.request.session.set_expiry(0)
+        return response
 
 
 def ip_of(r):
