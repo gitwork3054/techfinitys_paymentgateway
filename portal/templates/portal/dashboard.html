@@ -9,14 +9,16 @@
   <div class="due glass reveal" data-tilt>
     <div class="card-kicker"><span>Annual licence</span><span>{{ p.year }}</span></div>
     <div class="amt">₹<b data-count="{{ p.amount|floatformat:0 }}">{{ p.amount|floatformat:0 }}</b></div>
+    <div class="due-actions">
     {% if p.status == "paid" %}
       <div class="badge ok">Payment completed · {{ p.paid_at|date:"d M Y" }}</div>
-      <a class="btn" href="{% url 'slip' p.pk %}">View payment slip</a>
+      <a class="btn due-primary" href="{% url 'slip' p.pk %}">View payment slip</a>
     {% else %}
       <div class="badge">Due {{ c.due_date|date:"d M Y" }}</div>
-      <button class="btn pulse" id="payNow" data-id="{{ p.pk }}">Pay now</button>
+      <button class="btn pulse due-primary" id="payNow" data-id="{{ p.pk }}">Pay now</button>
     {% endif %}
-    <small class="mut invoice-label">Invoice {{ p.invoice_no }}</small>
+    </div>
+    <div class="invoice-footer"><span>Invoice</span><strong>{{ p.invoice_no }}</strong></div>
   </div>
 </section>
 
