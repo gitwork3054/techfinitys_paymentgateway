@@ -19,19 +19,21 @@
   <div class="bar"><i></i></div>
 </div>
 {% if user.is_authenticated %}
-<header class="nav shell-nav">
-  <a class="brand brand-combo" href="{% url 'dashboard' %}" aria-label="Techfinitys home">
-    <img src="{% static 'portal/tf-logo.png' %}" alt="Techfinitys logo">
-    <span>Techfinitys</span>
-  </a>
-  <nav id="mainNav">
-    {% url 'dashboard' as u1 %}{% url 'records' as u2 %}{% url 'profile' as u3 %}
-    <a href="{{u1}}" class="{% if request.path == u1 %}on{% endif %}">Overview</a>
-    <a href="{{u2}}" class="{% if request.path == u2 %}on{% endif %}">Records</a>
-    <a href="{{u3}}" class="{% if request.path == u3 %}on{% endif %}">Profile</a>
-    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme"><span class="sun">☀</span><span class="moon">☾</span></button>
-    <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="ghost">Sign out</button></form>
-  </nav>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand brand-combo" href="{% url 'dashboard' %}" aria-label="Techfinitys home">
+      <img src="{% static 'portal/tf-logo.png' %}" alt="Techfinitys logo">
+      <span>Techfinitys</span>
+    </a>
+    <nav id="mainNav">
+      {% url 'dashboard' as u1 %}{% url 'records' as u2 %}{% url 'profile' as u3 %}
+      <a href="{{u1}}" class="{% if request.path == u1 %}on{% endif %}">Overview</a>
+      <a href="{{u2}}" class="{% if request.path == u2 %}on{% endif %}">Records</a>
+      <a href="{{u3}}" class="{% if request.path == u3 %}on{% endif %}">Profile</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme"><span class="sun">☀</span><span class="moon">☾</span></button>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="ghost">Sign out</button></form>
+    </nav>
+  </div>
 </header>
 {% else %}
 <button class="theme-toggle floating-theme" type="button" data-theme-toggle aria-label="Switch color theme"><span class="sun">☀</span><span class="moon">☾</span></button>
