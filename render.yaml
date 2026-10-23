@@ -10,7 +10,7 @@ services:
     runtime: python
     plan: free
     buildCommand: bash build.sh
-    startCommand: python manage.py ensure_admin && python manage.py ensure_client && gunicorn config.wsgi:application
+    startCommand: python manage.py ensure_client && gunicorn config.wsgi:application
     envVars:
       - key: DATABASE_URL
         fromDatabase:
