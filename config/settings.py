@@ -84,8 +84,8 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
 
 COMPANY = {
-    "name": "Techfinitys",
-    "tagline": "Software engineered for infinite scale",
+    "name": "Techfinitys®",
+    "tagline": "Techfinitys® · Software engineered for infinite scale",
     "email": "hello@techfinitys.com",
     "phone": "+91 6356981879",
     "address": "Vadodara, Gujarat, India",
