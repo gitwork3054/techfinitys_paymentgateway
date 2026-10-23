@@ -143,8 +143,17 @@
    paymentId=d.id;
    $('#upiIdText').textContent=d.upi_id||'6356981879@axisbank';
    $('#upiAmountText').textContent='₹'+formatAmount(d.amount||amountInput?.value);
-   setState('Scan to pay','Use any UPI app to scan this Techfinitys&reg; QR.');
+   const upiButton=$('#openUpiApps');
+   if(d.upi_url){
+     upiButton.href=d.upi_url;
+     upiButton.hidden=false;
+   }
+   setState('Scan to pay','Use any UPI app to scan this Techfinitys\u00AE QR.');
    beginPolling();
+   const isPhone=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+   if(isPhone && d.upi_url){
+     setTimeout(()=>{window.location.href=d.upi_url;},350);
+   }
  };
 
  pn.addEventListener('click',()=>{
