@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = "Create or update the production client login and Client profile from environment variables."
 
     def handle(self, *args, **options):
-        username = os.environ.get("CLIENT_USERNAME", "client").strip() or "client"
+        username = os.environ.get("CLIENT_USERNAME", "ashapurarakhi").strip() or "client"
         password = os.environ.get("CLIENT_PASSWORD", "")
         if not password:
             raise CommandError("CLIENT_PASSWORD is missing. Add it in Render > Environment and deploy again.")
