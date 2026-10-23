@@ -591,3 +591,77 @@ main{width:min(1240px,calc(100% - 34px));padding-top:32px}
   .hero-payable-inline{margin-top:20px}
   .supplied-qr{max-width:270px}
 }
+
+/* Header clipping + centered Billing Suite card */
+.nav{
+  width:100%;
+  margin:0;
+  padding:0;
+  left:0;
+  right:0;
+}
+.nav-inner{
+  width:min(1240px,calc(100% - 32px));
+  margin:0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  min-width:0;
+}
+.nav-inner nav{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  min-width:0;
+  flex-wrap:nowrap;
+}
+.nav-inner form{margin:0;flex:none}
+.brand-combo{flex:none}
+.nav-inner .ghost{white-space:nowrap}
+
+.hero-single .hero-copy{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+}
+.hero-single .hero-copy .eyebrow,
+.hero-single .hero-copy .greeting,
+.hero-single .hero-copy .hero-meta{
+  align-self:center;
+}
+.hero-payable-inline{
+  margin-left:auto;
+  margin-right:auto;
+  text-align:left;
+}
+.hero-inline-cards-2{
+  margin-left:auto;
+  margin-right:auto;
+  text-align:left;
+}
+.hero-single h1{
+  text-align:center;
+}
+.hero-single .hero-meta{
+  justify-content:center;
+}
+
+@media(max-width:900px){
+  .nav-inner{
+    width:calc(100% - 20px);
+    gap:12px;
+  }
+  .nav-inner nav{
+    gap:6px;
+  }
+  .nav-inner nav>a{
+    display:none;
+  }
+}
+@media(max-width:520px){
+  .brand-combo span{display:none}
+  .nav-inner .ghost{padding:9px 10px}
+}
