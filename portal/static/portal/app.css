@@ -822,3 +822,28 @@ main{width:min(1240px,calc(100% - 34px));padding-top:32px}
 @media(prefers-reduced-motion:reduce){
   .splash-logo,.splash-orbit::before{animation:none!important}
 }
+
+/* Remember-login option */
+.remember-row{
+  display:flex!important;
+  grid-template-columns:none!important;
+  align-items:center;
+  gap:10px!important;
+  color:var(--text)!important;
+  font-size:.82rem!important;
+  cursor:pointer;
+}
+.remember-row input{
+  width:17px!important;
+  height:17px!important;
+  min-height:0!important;
+  padding:0!important;
+  accent-color:var(--accent);
+  flex:none;
+}
+.login-security-note{
+  margin:-4px 0 2px;
+  color:var(--muted);
+  font-size:.72rem;
+  line-height:1.45;
+}
