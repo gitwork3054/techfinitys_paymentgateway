@@ -1,0 +1,32 @@
+databases:
+  - name: techfinitys-payment-db
+    plan: free
+    databaseName: techfinitys_payment
+    user: techfinitys_payment
+
+services:
+  - type: web
+    name: techfinitys-paymentgateway
+    runtime: python
+    plan: free
+    buildCommand: ./build.sh
+    startCommand: gunicorn config.wsgi:application
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: techfinitys-payment-db
+          property: connectionString
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "false"
+      - key: CASHFREE_ENV
+        value: sandbox
+      - key: PAYMENT_PROVIDER
+        value: Cashfree
+      - key: CASHFREE_CLIENT_ID
+        sync: false
+      - key: CASHFREE_CLIENT_SECRET
+        sync: false
+      - key: CASHFREE_FALLBACK_PHONE
+        sync: false
