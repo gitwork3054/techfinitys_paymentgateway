@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#090b10">
-<title>{% block title %}Techfinitys Client Portal{% endblock %}</title>
+<title>{% block title %}Techfinitys&reg; Client Portal{% endblock %}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,8 +14,8 @@
 <body class="{% block bodyclass %}{% endblock %}">
 <div id="splash" aria-hidden="true">
   <div class="splash-orbit"><img src="{% static 'portal/tf-logo.png' %}" class="splash-logo" alt=""></div>
-  <div class="word" id="word">Techfinitys</div>
-  <div class="tag">Software engineered for infinite scale</div>
+  <div class="word" id="word">Techfinitys&reg;</div>
+  <div class="tag">Techfinitys&reg; · Software engineered for infinite scale</div>
   <div class="bar"><i></i></div>
 </div>
 {% if user.is_authenticated %}
@@ -23,7 +23,7 @@
   <div class="nav-inner">
     <a class="brand brand-combo" href="{% url 'dashboard' %}" aria-label="Techfinitys home">
       <img src="{% static 'portal/tf-logo.png' %}" alt="Techfinitys logo">
-      <span>Techfinitys</span>
+      <span>Techfinitys&reg;</span>
     </a>
     <nav id="mainNav">
       {% url 'dashboard' as u1 %}{% url 'records' as u2 %}{% url 'profile' as u3 %}
