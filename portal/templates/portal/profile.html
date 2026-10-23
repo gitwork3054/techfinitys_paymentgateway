@@ -1,6 +1,6 @@
-{% extends "portal/base.html" %}{% block content %}
+{% extends "portal/base.html" %}{% load static %}{% block content %}
 <section class="profile-hero glass reveal">
-  <div class="avatar">{{ c.contact|slice:":1" }}</div>
+  <div class="avatar client-logo-avatar"><img src="{% static 'portal/ashapura-profile-logo.jpg' %}" alt="Ashapura Rakhi logo"></div>
   <div><p class="eyebrow">Client profile</p><h1>{{ brand.name }}</h1><p class="mut">{{ brand.about }}</p></div>
   <div class="profile-status"><span class="status-dot solid"></span>Active account</div>
 </section>
