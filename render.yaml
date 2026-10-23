@@ -9,7 +9,7 @@ services:
     name: techfinitys-paymentgateway
     runtime: python
     plan: free
-    buildCommand: ./build.sh
+    buildCommand: bash build.sh
     startCommand: gunicorn config.wsgi:application
     envVars:
       - key: DATABASE_URL
@@ -20,13 +20,11 @@ services:
         generateValue: true
       - key: DJANGO_DEBUG
         value: "false"
+      - key: DJANGO_SUPERUSER_USERNAME
+        value: admin
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
       - key: CASHFREE_ENV
         value: sandbox
       - key: PAYMENT_PROVIDER
         value: Cashfree
-      - key: CASHFREE_CLIENT_ID
-        sync: false
-      - key: CASHFREE_CLIENT_SECRET
-        sync: false
-      - key: CASHFREE_FALLBACK_PHONE
-        sync: false
